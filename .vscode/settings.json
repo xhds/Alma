@@ -1,0 +1,7 @@
+{
+      // 控制编辑器在空白字符上显示符号的方式。
+  //  - none
+  //  - boundary: 除了单个空格，在空白字符上显示符号。
+  //  - all
+  "editor.renderWhitespace": "all",
+}
