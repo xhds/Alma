@@ -4,4 +4,5 @@
   //  - boundary: 除了单个空格，在空白字符上显示符号。
   //  - all
   "editor.renderWhitespace": "all",
+  "python.pythonPath": "C:\\Users\\MzsJoey\\Anaconda3\\python.exe",
 }
