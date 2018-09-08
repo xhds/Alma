@@ -47,6 +47,7 @@ class UnusedTextmapIDScanner:
         #allIDs = allIDs[27006:27047]
         #allIDs = allIDs[3274:3315]
         #allIDs = allIDs[3371:3387]
+        allIDs = allIDs[3261:]
         fileCount = len(allTargetFilesPath)
         fileidx = 1
         allFiles = []
@@ -96,9 +97,49 @@ class UnusedTextmapIDScanner:
                     result.append(os.path.join(root, f))
         return result
 
+    def FindAllUnusedIDsV2(self, allIDsFilePath, targetDir, outputDir):
+        print("start at %s" % datetime.datetime.now())
+        allIDs = None
+        with open(allIDsFilePath, "r", encoding="utf-8") as allIDsFile:
+            allIDs = [i.strip() for i in allIDsFile]
+        allTargetFilesPath = [targetDir + "\\" + i for i in os.listdir(targetDir) if (not re.match("TextMap", i) and not re.match("Textmap", i)) and os.path.splitext(i)[1]==".txt"]
+        #allIDs = allIDs[27006:27047]
+        #allIDs = allIDs[3274:3315]
+        #allIDs = allIDs[3371:3387]
+        allIDs = allIDs[3261:]
+        removeIDs = []
+        idCounts = len(allIDs)
+        idIndex = 0
+        for id in allIDs:
+            idIndex += 1
+            os.sys.stdout.write("processing id %d/%d  remove %d \r" % (idIndex, idCounts, len(removeIDs)))
+            os.sys.stdout.flush()
+            p = "[\s]"+id+"[\s]"
+            found = False
+            for filePath in allTargetFilesPath:
+                with open(filePath, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if re.search(p, line):
+                            removeIDs.append(id)
+                            found = True
+                            break
+                if found:
+                    break
+
+        for id in removeIDs:
+                allIDs.remove(id)
+        with open(self._getUnusedIDsOutputFileName(outputDir), "x", encoding="utf-8") as outputFile:
+            for id in allIDs:
+                outputFile.write(id + "\n")
+        sys.stdout.write("\nDone!")
+        sys.stdout.flush()
+        print("\nends at %s" % datetime.datetime.now())
+        
+
 if __name__ == "__main__":
     os.system("cls")
     s = UnusedTextmapIDScanner()
     #s.ScanAllTextmap(r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
-    s.FindAllUnusedIDs(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
+    #s.FindAllUnusedIDs(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
+    s.FindAllUnusedIDsV2(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
     #s.FindAllUnusedIDs(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\MoleMole", r"E:\\")
