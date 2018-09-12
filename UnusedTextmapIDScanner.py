@@ -52,32 +52,29 @@ class UnusedTextmapIDScanner:
         fileidx = 1
         allFiles = []
         for targetFilePath in allTargetFilesPath:
-            allFiles.append(open(targetFilePath, "r", encoding="utf-8"))
+            allFiles.append(open(targetFilePath, "r", encoding="utf-8").read())
             sys.stdout.write("loading %d/%d\r" % (fileidx, fileCount))
             sys.stdout.flush()
             fileidx += 1
         sys.stdout.write("\nloading Done!\n")
         sys.stdout.flush()
-
         print(len(allIDs))
         fileidx = 0
+
+        allPatters = []
+        for id in allIDs:
+            allPatters.append((id, "[\s]"+id+"[\s]"))
+
         for targetFile in allFiles:
             fileidx += 1
             removeIDs = []
-            for id in allIDs:
-                p = "[\s]"+id+"[\s]"
-                for line in targetFile:
-                    #if line.find(id) != -1:
-                    if re.search(p, line):
-                        removeIDs.append(id)
-                        break
-            if (len(removeIDs) > 0):
-                print("processing %d/%d %s" %(fileidx, fileCount, targetFile.name))
-                print(removeIDs)
+            for idp in allPatters:
+                if re.match(idp[1], targetFile):
+                    removeIDs.append(idp[0])
+            sys.stdout.write("loading %d/%d remove %d\r" % (fileidx, fileCount, len(removeIDs)))
+            sys.stdout.flush()
             for id in removeIDs:
                 allIDs.remove(id)
-            if (len(removeIDs) > 0):
-                print(len(allIDs))
 
         for targetFile in allFiles:
             targetFile.close()
@@ -103,10 +100,20 @@ class UnusedTextmapIDScanner:
         with open(allIDsFilePath, "r", encoding="utf-8") as allIDsFile:
             allIDs = [i.strip() for i in allIDsFile]
         allTargetFilesPath = [targetDir + "\\" + i for i in os.listdir(targetDir) if (not re.match("TextMap", i) and not re.match("Textmap", i)) and os.path.splitext(i)[1]==".txt"]
+        fileCount = len(allTargetFilesPath)
+        fileidx = 1
+        allFiles = []
+        for targetFilePath in allTargetFilesPath:
+            allFiles.append(open(targetFilePath, "r", encoding="utf-8"))
+            sys.stdout.write("loading %d/%d\r" % (fileidx, fileCount))
+            sys.stdout.flush()
+            fileidx += 1
+        sys.stdout.write("\nloading Done!\n")
+        sys.stdout.flush()
         #allIDs = allIDs[27006:27047]
         #allIDs = allIDs[3274:3315]
         #allIDs = allIDs[3371:3387]
-        allIDs = allIDs[3261:]
+        #allIDs = allIDs[3261:]
         removeIDs = []
         idCounts = len(allIDs)
         idIndex = 0
@@ -116,18 +123,22 @@ class UnusedTextmapIDScanner:
             os.sys.stdout.flush()
             p = "[\s]"+id+"[\s]"
             found = False
-            for filePath in allTargetFilesPath:
-                with open(filePath, "r", encoding="utf-8") as f:
-                    for line in f:
-                        if re.search(p, line):
-                            removeIDs.append(id)
-                            found = True
-                            break
+            for f in allFiles:
+                f.seek(0)
+                for line in f:
+                    if re.search(p, line):
+                        removeIDs.append(id)
+                        found = True
+                        break
                 if found:
                     break
 
         for id in removeIDs:
                 allIDs.remove(id)
+
+        for targetFile in allFiles:
+            targetFile.close()
+
         with open(self._getUnusedIDsOutputFileName(outputDir), "x", encoding="utf-8") as outputFile:
             for id in allIDs:
                 outputFile.write(id + "\n")
@@ -140,6 +151,6 @@ if __name__ == "__main__":
     os.system("cls")
     s = UnusedTextmapIDScanner()
     #s.ScanAllTextmap(r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
-    #s.FindAllUnusedIDs(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
-    s.FindAllUnusedIDsV2(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
+    s.FindAllUnusedIDs(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
+    #s.FindAllUnusedIDsV2(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\Resources\Data\_ExcelOutput", r"E:\\")
     #s.FindAllUnusedIDs(r"E:\AllTextmapIDs-20180908-193508.txt", r"E:\ng_hsod_master\Assets\MoleMole", r"E:\\")
