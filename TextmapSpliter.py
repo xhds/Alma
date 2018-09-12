@@ -4,21 +4,22 @@ import datetime
 import sys
 
 class Spliter(object):
-    def Run(self, targetFile, maxRow = 0):
+    def Run(self, targetFile, maxRow = 0, outputDir = None, outputFileName = None):
         rowOneCellNames = ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1", "J1"]
-        book = openpyxl.load_workbook(targetFile, read_only=True)
-        sheet = book[book.sheetnames[0]]
+        inputBook = openpyxl.load_workbook(targetFile, read_only=True)
+        inputSheet = inputBook[inputBook.sheetnames[0]]
         if maxRow != 0:
-            sheet.max_row = maxRow
+            inputSheet.max_row = maxRow
         columsName = []
         for i in rowOneCellNames:
-            columsName.append(sheet[i].value)
+            columsName.append(inputSheet[i].value)
         
+        print("Begin loading input file : %s ..." % targetFile)
         rowIndex = 1
-        maxIndex = sheet.max_row
+        maxIndex = inputSheet.max_row
         allData = {}
         isFirstRow = True
-        for row in sheet:
+        for row in inputSheet:
 
             sys.stdout.write("processing index %d/%d \r" %(rowIndex, maxIndex))
             sys.stdout.flush()
@@ -42,9 +43,11 @@ class Spliter(object):
                 oneRow.append(cell.value)
             if rowData != None:
                 rowData.append(oneRow)
-        print("\n process Done!")
+        print("\nprocess Done!")
         
-        print("Begin write files")
+        print("Begin writing files...")
+        if outputDir != None:
+            os.makedirs(outputDir, exist_ok=True)
         fileIndex = 1
         maxFile = len(allData)
         for fileName in allData:
@@ -55,17 +58,49 @@ class Spliter(object):
             fileIndex += 1
 
             writeBook = openpyxl.Workbook(write_only=True)
-            writeSheet = writeBook.create_sheet()
+            writeSheet = writeBook.create_sheet(title=fileName)
             writeSheet.append(columsName)
             for row in allData[fileName]:
                 writeSheet.append(row)
-            writeBook.save(fileName+".xlsx")
-        print("\n Write Done!")
+            outputPath = fileName+".xlsx"
+            if outputDir != None:
+                outputPath = outputDir + "\\" + outputPath
+            writeBook.save(outputPath)
+        print("\nWrite Files Done!")
+
+        print("Begin writing AllInOne file...")
+        fileIndex = 1
+        writeBook = openpyxl.Workbook(write_only=True)
+        for fileName in allData:
+            if fileName == None:
+                continue
+            sys.stdout.write("processing file %d/%d \r" %(fileIndex, maxFile))
+            sys.stdout.flush()
+            fileIndex += 1
+
+            writeSheet = writeBook.create_sheet(title=fileName)
+            writeSheet.append(columsName)
+            for row in allData[fileName]:
+                writeSheet.append(row)
+        writeBook.save(outputFileName)
+        print("\nWrite AllInOne file Done!")
 
 if __name__ == "__main__":
-    print("Begin ... at %s " % datetime.datetime.now())
-    filename = "TextMapMerge去重-2.3 only-en.xlsx"
-    maxRow = 38615
+    print("Begin at %s " % datetime.datetime.now())
+
+    #输入文件
+    inputFileName = "TextMapMerge去重-2.3 only-en.xlsx"
+    
+    #原文件存有很多空行，手动定位一下最后一行数据，以便运行时间不会过长
+    maxRow = 38615 
+    
+    #输出文件夹
+    outputDir = "TextMapFiles"
+    
+    #输出的合一文件
+    outputFileName = "TextMapFilesAllInOne.xlsx"
+
     s = Spliter()
-    s.Run(filename, maxRow)
-    print("Done! at %s " % datetime.datetime.now())
+    s.Run(inputFileName, maxRow, outputDir, outputFileName)
+
+    print("All Done! at %s " % datetime.datetime.now())
