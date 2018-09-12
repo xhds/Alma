@@ -33,12 +33,15 @@ class Spliter(object):
             for cell in row:
                 if rowData == None:
                     rowID = cell.value
+                    if rowID == None:
+                        break
                     rowData = allData.get(rowID)
                     if rowData == None:
                         rowData = []
                         allData[rowID] = rowData
                 oneRow.append(cell.value)
-            rowData.append(oneRow)
+            if rowData != None:
+                rowData.append(oneRow)
         print("\n process Done!")
         
         print("Begin write files")
@@ -47,7 +50,7 @@ class Spliter(object):
         for fileName in allData:
             if fileName == None:
                 continue
-            sys.stdout.write("processing file %d / %d \r" %(fileIndex, maxFile))
+            sys.stdout.write("processing file %d/%d \r" %(fileIndex, maxFile))
             sys.stdout.flush()
             fileIndex += 1
 
