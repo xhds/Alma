@@ -45,7 +45,7 @@ class Spliter(object):
         fileIndex = 1
         maxFile = len(allData)
         for fileName in allData:
-            if (fileName == None)
+            if fileName == None:
                 continue
             sys.stdout.write("processing file %d / %d \r" %(fileIndex, maxFile))
             sys.stdout.flush()
