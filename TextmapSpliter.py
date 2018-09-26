@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import openpyxl
 import datetime
@@ -92,13 +93,13 @@ if __name__ == "__main__":
     inputFileName = sys.argv[1]
     
     #原文件存有很多空行，手动定位一下最后一行数据，以便运行时间不会过长
-    maxRow = 38615 
+    maxRow = 0 
     
     #输出文件夹
-    outputDir = "TextMapFiles"
+    outputDir = "TextMapFiles_" + inputFileName
     
     #输出的合一文件
-    outputFileName = "TextMapFilesAllInOne.xlsx"
+    outputFileName = inputFileName + ".AllInOne.xlsx"
 
     s = Spliter()
     s.Run(inputFileName, maxRow, outputDir, outputFileName)
