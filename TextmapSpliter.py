@@ -89,7 +89,7 @@ if __name__ == "__main__":
     print("Begin at %s " % datetime.datetime.now())
 
     #输入文件
-    inputFileName = "TextMapMerge去重-2.3 only-en.xlsx"
+    inputFileName = sys.argv[1]
     
     #原文件存有很多空行，手动定位一下最后一行数据，以便运行时间不会过长
     maxRow = 38615 
