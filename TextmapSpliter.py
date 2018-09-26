@@ -6,14 +6,11 @@ import sys
 
 class Spliter(object):
     def Run(self, targetFile, maxRow = 0, outputDir = None, outputFileName = None):
-        rowOneCellNames = ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1", "J1"]
         inputBook = openpyxl.load_workbook(targetFile, read_only=True)
         inputSheet = inputBook[inputBook.sheetnames[0]]
         if maxRow != 0:
             inputSheet.max_row = maxRow
         columsName = []
-        for i in rowOneCellNames:
-            columsName.append(inputSheet[i].value)
         
         print("Begin loading input file : %s ..." % targetFile)
         rowIndex = 1
@@ -28,6 +25,8 @@ class Spliter(object):
 
             if isFirstRow:
                 isFirstRow = False
+                for cell in row:
+                    columsName.append(cell.value)
                 continue
             rowData = None
             rowID = ""
