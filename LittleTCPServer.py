@@ -1,25 +1,33 @@
 import socket
-import threading
 import time
+import threading
 
-def handleClient(socketObj, address):
-    print("Receive from %s:%s" % address)
-    socketObj.send(b"welcome")
+HOST_IP = "127.0.0.1"
+PORT = 18119
+SLEEP_TIME = 1
+RECV_BUFF_MAX = 1024
+EXIT_CODE = b"exit"
+CODING = "utf-8"
+MAX_CLIENT = 5
+ACC_CODE = b"Welcome"
+
+def handleClient(clientSocket, clientAddress):
+    print("Receive message from %s:%s" % clientAddress)
+    clientSocket.send(ACC_CODE)
     while True:
-        data = socketObj.recv(1024)
-        time.sleep(1)
-        if not data or data.decode("utf-8")=="exit":
+        data = clientSocket.recv(RECV_BUFF_MAX)
+        time.sleep(SLEEP_TIME)
+        if not data or data==EXIT_CODE:
             break
-        socketObj.send(("Hello %s" % data.decode("utf-8")).encode("utf-8"))
-    socketObj.close()
-    pass
+        sendMsg = "Hello %s" % data.decode(CODING)
+        clientSocket.send(sendMsg.encode(CODING))
+    clientSocket.close()
 
-if __name__ == "__main__":
-    socketObj = socket.socket()
-    socketObj.bind(("127.0.0.1", 18119))
-    socketObj.listen(5)
-    print("Waiting for connection...")
-    while True:
-        newSockectObj, address = socketObj.accept()
-        newThread = threading.Thread(target=handleClient, args=(newSockectObj, address))
-        newThread.start()
+print("Start!")
+listenSocket = socket.socket()
+listenSocket.bind((HOST_IP, PORT))
+listenSocket.listen(MAX_CLIENT)
+while True:
+    acceptClient, address = listenSocket.accept()
+    workingThread = threading.Thread(target=handleClient, args=(acceptClient, address))
+    workingThread.start()

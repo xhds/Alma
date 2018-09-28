@@ -1,11 +1,16 @@
 import socket
 
-if __name__=="__main__":
-    socketObj = socket.socket()
-    socketObj.connect(("127.0.0.1", 18119))
-    print(socketObj.recv(1024).decode("utf-8"))
-    for name in [b"Joey", b"Candice"]:
-        socketObj.send(name)
-        print(socketObj.recv(1024).decode("utf-8"))
-    socketObj.send(b"exit")
-    socketObj.close()
+HOST_IP = "127.0.0.1"
+PORT = 18119
+RECV_BUFF_MAX = 1024
+EXIT_CODE = b"exit"
+CODING = "utf-8"
+
+workingSocket = socket.socket()
+workingSocket.connect((HOST_IP, PORT))
+print(workingSocket.recv(RECV_BUFF_MAX).decode(CODING))
+for name in [b"Fuck", b"YOU"]:
+    workingSocket.send(name)
+    print(workingSocket.recv(RECV_BUFF_MAX).decode(CODING))
+workingSocket.send(EXIT_CODE)
+workingSocket.close()
